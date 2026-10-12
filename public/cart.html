@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your Cart | CampusBite</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/">CampusBite</a>
+    <a href="/breakfast.html">Breakfast</a>
+    <a href="/lunch.html">Lunch</a>
+    <a href="/dinner.html">Dinner</a>
+    <a href="/orders.html">My orders</a>
+  </nav>
+
+  <main class="container">
+    <h1>Your shopping cart</h1>
+    <div id="cartItems"></div>
+    <h2 id="cartTotal">Total: ₹0.00</h2>
+    <button id="checkoutButton">Proceed to checkout</button>
+    <p><a href="/breakfast.html">Continue shopping</a></p>
+  </main>
+
+  <script src="/js/cart.js"></script>
+  <script>
+    const container = document.getElementById("cartItems");
+
+    function renderCart() {
+      const items = Cart.read();
+
+      if (!items.length) {
+        container.innerHTML = "<p>Your cart is empty.</p>";
+        document.getElementById("cartTotal").textContent = "Total: ₹0.00";
+        document.getElementById("checkoutButton").disabled = true;
+        return;
+      }
+
+      document.getElementById("checkoutButton").disabled = false;
+
+      container.innerHTML = items.map(item => `
+        <article class="cart-row">
+          <div>
+            <h3>${escapeHTML(item.name)}</h3>
+            <p>₹${Number(item.price).toFixed(2)} each</p>
+          </div>
+          <div class="quantity-controls">
+            <button data-action="minus" data-id="${item.mealId}">−</button>
+            <span>${item.quantity}</span>
+            <button data-action="plus" data-id="${item.mealId}">+</button>
+            <button data-action="remove" data-id="${item.mealId}">Remove</button>
+          </div>
+          <strong>₹${(item.price * item.quantity).toFixed(2)}</strong>
+        </article>
+      `).join("");
+
+      document.getElementById("cartTotal").textContent =
+        "Total: ₹" + Cart.total().toFixed(2);
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+      }[char]));
+    }
+
+    container.addEventListener("click", event => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+
+      const id = button.dataset.id;
+      const action = button.dataset.action;
+
+      if (action === "plus") Cart.changeQuantity(id, 1);
+      if (action === "minus") Cart.changeQuantity(id, -1);
+      if (action === "remove") Cart.remove(id);
+
+      renderCart();
+    });
+
+    document.getElementById("checkoutButton").addEventListener("click", () => {
+      location.href = "/checkout.html";
+    });
+
+    window.addEventListener("cart:changed", renderCart);
+    renderCart();
+  </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MIT Canteen</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14313a;--page:#f2f5f4;--surface:#fff;--accent:#1f7a6b;--dark:#17594e;--muted:#5b6b70;--border:#d5dddf}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font-family:Manrope,"Segoe UI",system-ui,sans-serif;background:var(--page);color:var(--ink)}
+a{color:inherit;text-decoration:none}
+.c{max-width:1100px;margin:auto;padding:0 24px}
+nav{position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--border);z-index:5}
+nav .c{display:flex;justify-content:space-between;align-items:center;height:68px}
+.logo{font-weight:800;font-size:1.25rem;color:var(--accent)}
+nav ul{display:flex;gap:24px;align-items:center;list-style:none;margin:0;padding:0;font-weight:600}
+nav ul a:hover{color:var(--accent)}
+.btn{display:inline-block;padding:12px 22px;background:var(--accent);color:#fff;border-radius:8px;font-weight:700}
+.btn:hover{background:var(--dark)}
+
+/* Hero: text sits on top of the image */
+.hero{
+  padding:120px 0;text-align:center;color:#fff;
+  background:
+    linear-gradient(rgba(20,49,58,.65),rgba(20,49,58,.65)),
+    url("dal khichdi.jpeg") center/cover no-repeat;
+}
+.hero h1{font-size:3rem;margin:0 0 14px;letter-spacing:-.02em;text-shadow:0 2px 12px rgba(0,0,0,.35)}
+.hero p{color:rgba(255,255,255,.9);max-width:560px;margin:0 auto 28px;font-size:1.1rem}
+
+section{padding:50px 0;scroll-margin-top:70px}
+h2{font-size:1.8rem;margin:0 0 20px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px}
+.card h3{margin:0 0 6px}.card .t{color:var(--accent);font-weight:800;font-size:1.1rem}
+.card p{color:var(--muted);margin:6px 0 0}
+footer{padding:30px 0;text-align:center;color:var(--muted);border-top:1px solid var(--border)}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.hero{padding:80px 0}.hero h1{font-size:2rem}}
+</style>
+</head>
+<body>
+<nav><div class="c">
+  <a href="/index.html" class="logo">MIT Canteen</a>
+  <ul>
+    <li><a href="#timetable">Timetable</a></li>
+    <li><a href="#about">About us</a></li>
+  </ul>
+</div></nav>
+
+<header class="hero"><div class="c">
+  <h1>Skip the queue.<br>Order your mess meal online.</h1>
+  <p>Pick your food, pay with a QR, get a token number. No more rush at breakfast, lunch or dinner.</p>
+  <a href="login.html" class="btn" id="heroBtn">Get started</a>
+</div></header>
+
+<section id="timetable"><div class="c">
+  <h2>Meal timetable</h2>
+  <div class="grid">
+    <a class="card" href="breakfast.html"><h3>Breakfast</h3><div class="t">7:30 AM – 10:30 AM</div><p>Poha, idli, dosa, paratha and more.</p></a>
+    <a class="card" href="lunch.html"><h3>Lunch</h3><div class="t">12:00 PM – 3:00 PM</div><p>Thali, biryani, rajma chawal and more.</p></a>
+    <a class="card" href="dinner.html"><h3>Dinner</h3><div class="t">7:00 PM – 9:30 PM</div><p>Dal tadka, pav bhaji, noodles and more.</p></a>
+  </div>
+</div></section>
+
+<section id="about"><div class="c">
+  <h2>About us</h2>
+  <div class="card"><p style="color:var(--ink);margin:0;line-height:1.7">
+    MIT Canteen serves hundreds of students every day, and the rush at meal times means long queues.
+    This app lets you order ahead, pay by UPI QR, and collect your food using your token number.
+    The canteen team sees every order live, so food is ready faster and nothing gets missed.</p></div>
+  <div class="grid" style="margin-top:20px">
+    <div class="card"><h3>1. Login</h3><p>Create a free account with your email.</p></div>
+    <div class="card"><h3>2. Order &amp; pay</h3><p>Add food to the cart and scan the QR to pay.</p></div>
+    <div class="card"><h3>3. Collect</h3><p>Show your receipt token at the counter.</p></div>
+  </div>
+</div></section>
+
+<footer>© MIT Canteen</footer>
+
+<script>
+// If already logged in, the hero button goes to the right dashboard
+if (localStorage.getItem('token')) {
+  const isAdmin = localStorage.getItem('role') === 'admin';
+  const b = document.getElementById('heroBtn');
+  b.textContent = isAdmin ? 'Open admin panel' : 'Go to my dashboard';
+  b.href = isAdmin ? '/admin.html' : '/orders.html';
+}
+</script>
+</body>
+</html>

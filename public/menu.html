@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu | MIT Canteen</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14313a;--page:#f2f5f4;--surface:#fff;--accent:#1f7a6b;--accent-dark:#17594e;--muted:#5b6b70;--border:#d5dddf;--danger:#b3382c}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Manrope,"Segoe UI",system-ui,sans-serif;color:var(--ink);background:var(--page)}
+a{color:inherit;text-decoration:none}
+.container{width:100%;max-width:1200px;margin:0 auto;padding:0 32px}
+.navbar{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--border)}
+.navbar .container{display:flex;align-items:center;justify-content:space-between;gap:24px;height:72px}
+.logo{font-size:1.25rem;font-weight:800;color:var(--accent)}
+.nav-links{display:flex;align-items:center;gap:28px;margin:0;padding:0;list-style:none;font-weight:600}
+.nav-links a:hover{color:var(--accent)}
+.nav-cta{padding:10px 20px;color:#fff!important;background:var(--accent);border-radius:8px}
+main{padding:40px 0 110px}
+h1{margin:0 0 8px;font-size:2rem;font-weight:800;letter-spacing:-.02em}
+.sub{margin:0 0 24px;color:var(--muted)}
+.tabs{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap}
+.tabs a{padding:8px 20px;border:1px solid var(--border);border-radius:999px;background:var(--surface);font-weight:600;cursor:pointer}
+.tabs a:hover{border-color:var(--accent);color:var(--accent)}
+.tabs a.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.menu{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.dish{overflow:hidden;background:var(--surface);border:1px solid var(--border);border-radius:14px;transition:.15s}
+.dish:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(20,49,58,.1)}
+.dish img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#dfe7e5}
+.dish-body{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px}
+.dish-name{margin:0;font-size:1.06rem;font-weight:700}
+.price{font-size:1.125rem;font-weight:800;color:var(--accent);white-space:nowrap}
+.dish-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 18px 16px;border-top:1px solid var(--border)}
+.dish-line{font-size:.875rem;color:var(--muted);font-weight:600}
+.dish-line strong{color:var(--ink)}
+.qty{display:inline-flex;align-items:center;gap:4px}
+.qty button{width:34px;height:34px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:1.125rem;font-weight:700;cursor:pointer}
+.qty .plus{background:var(--accent);border-color:var(--accent);color:#fff}
+.qty .plus:hover:not(:disabled){background:var(--accent-dark)}
+.qty .minus:hover:not(:disabled){border-color:var(--danger);color:var(--danger)}
+.qty button:disabled{opacity:.4;cursor:not-allowed}
+.qty .count{min-width:32px;text-align:center;font-weight:800}
+.muted{color:var(--muted)}
+@media(max-width:900px){.menu{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.menu{grid-template-columns:1fr}.container{padding:0 20px}.nav-links{gap:14px;font-size:.85rem}}
+
+.cart-section{margin-top:48px;scroll-margin-top:90px}
+.cart-row{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 18px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.cart-row h3{margin:0 0 4px;font-size:1.06rem}
+.cart-row p{margin:0;color:var(--muted);font-size:.9rem}
+.quantity-controls{display:flex;align-items:center;gap:8px}
+.quantity-controls button,#checkoutButton{padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);font:inherit;font-weight:600;cursor:pointer}
+.quantity-controls button[data-action="remove"]:hover{border-color:var(--danger);color:var(--danger)}
+#checkoutButton{background:var(--accent);border-color:var(--accent);color:#fff;padding:12px 24px}
+#checkoutButton:hover:not(:disabled){background:var(--accent-dark)}
+#checkoutButton:disabled{opacity:.5;cursor:not-allowed}
+.cart-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--ink);color:#fff}
+.cart-bar .container{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:14px;padding-bottom:14px}
+.cart-bar strong{font-size:1.125rem;font-weight:800}
+.cart-bar a{padding:10px 20px;background:var(--accent);border-radius:8px;font-weight:700}
+</style>
+</head>
+<body>
+<header class="navbar"><div class="container">
+  <a href="/index.html" class="logo">MIT Canteen</a>
+  <ul class="nav-links">
+    <li><a href="/orders.html">Change mess</a></li>
+    <li><a href="/orders.html#orders">My orders</a></li>
+    <li><a href="#" id="logout" class="nav-cta">Log out</a></li>
+  </ul>
+</div></header>
+
+<main><div class="container">
+  <h1 id="messName">Menu</h1>
+  <p class="sub" id="timing"></p>
+
+  <nav class="tabs" id="tabs">
+    <a data-m="breakfast">Breakfast</a><a data-m="lunch">Lunch</a><a data-m="dinner">Dinner</a>
+  </nav>
+
+  <section class="menu" id="menu"></section>
+
+  <section class="cart-section" id="cart">
+    <h1>Your shopping cart</h1>
+    <div id="cartItems"></div>
+    <h2 id="cartTotal">Total: ₹0.00</h2>
+    <button id="checkoutButton">Proceed to checkout</button>
+  </section>
+</div></main>
+
+<div class="cart-bar"><div class="container">
+  <div><span id="barCount">0 items</span> · <strong id="barTotal">₹0.00</strong></div>
+  <a href="#cart">View cart</a>
+</div></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---- must be logged in as a student and have picked a mess ---- */
+if (!localStorage.getItem('token')) location.replace('/login.html');
+const mess = JSON.parse(localStorage.getItem('selectedMess') || 'null');
+if (!mess) { location.replace('/orders.html'); throw new Error('no mess selected'); }
+$('messName').textContent = mess.name;
+$('logout').onclick = e => { e.preventDefault(); localStorage.clear(); location.href = '/index.html'; };
+
+/* ---- meal tabs ---- */
+const TIMES = { breakfast: '7:30 AM – 10:30 AM', lunch: '12:00 PM – 3:00 PM', dinner: '7:00 PM – 9:30 PM' };
+let meal = new URLSearchParams(location.search).get('meal');
+if (!TIMES[meal]) { const h = new Date().getHours(); meal = h < 11 ? 'breakfast' : h < 17 ? 'lunch' : 'dinner'; }
+
+async function loadMenu() {
+  $('timing').textContent = 'Served ' + TIMES[meal];
+  [...$('tabs').children].forEach(a => a.classList.toggle('active', a.dataset.m === meal));
+  $('menu').innerHTML = '<p class="muted">Loading…</p>';
+  const r = await fetch('/api/meals?mess=' + mess.id + '&category=' + meal);
+  const meals = await r.json();
+  $('menu').innerHTML = meals.length ? meals.map(m => `
+    <article class="dish" data-id="${esc(m.slug)}" data-name="${esc(m.name)}" data-price="${m.price}" data-ok="${m.available ? 1 : 0}">
+      <img src="/${encodeURI(m.image || '')}" alt="${esc(m.name)}" onerror="this.style.visibility='hidden'">
+      <div class="dish-body"><h3 class="dish-name">${esc(m.name)}</h3><span class="price">₹${m.price}</span></div>
+      <div class="dish-footer">
+        <span class="dish-line"></span>
+        <div class="qty">
+          <button type="button" class="minus" aria-label="Remove one">−</button>
+          <span class="count">0</span>
+          <button type="button" class="plus" aria-label="Add one">+</button>
+        </div>
+      </div>
+    </article>`).join('') : '<p class="muted">No dishes added yet for this meal.</p>';
+  syncDishes();
+}
+$('tabs').onclick = e => { const a = e.target.closest('a[data-m]'); if (!a) return; meal = a.dataset.m; loadMenu(); };
+
+/* ---- cart store (localStorage) ---- */
+const Cart = {
+  key: 'canteenCart',
+  read() { try { return JSON.parse(localStorage.getItem(this.key)) || []; } catch (e) { return []; } },
+  write(items) { try { localStorage.setItem(this.key, JSON.stringify(items)); } catch (e) {} window.dispatchEvent(new Event('cart:changed')); },
+  quantityOf(id) { const f = this.read().find(i => i.mealId === id); return f ? f.quantity : 0; },
+  add(m) {
+    const items = this.read(); const f = items.find(i => i.mealId === m.mealId);
+    if (f) f.quantity += 1; else items.push({ mealId: m.mealId, name: m.name, price: m.price, quantity: 1 });
+    this.write(items);
+  },
+  change(id, d) {
+    let items = this.read(); const f = items.find(i => i.mealId === id); if (!f) return;
+    f.quantity += d; items = items.filter(i => i.quantity > 0); this.write(items);
+  },
+  remove(id) { this.write(this.read().filter(i => i.mealId !== id)); },
+  count() { return this.read().reduce((n, i) => n + i.quantity, 0); },
+  total() { return this.read().reduce((s, i) => s + i.price * i.quantity, 0); }
+};
+
+$('menu').addEventListener('click', e => {
+  const b = e.target.closest('button'); const d = e.target.closest('.dish'); if (!b || !d) return;
+  if (b.classList.contains('plus')) Cart.add({ mealId: d.dataset.id, name: d.dataset.name, price: Number(d.dataset.price) });
+  if (b.classList.contains('minus')) Cart.change(d.dataset.id, -1);
+});
+
+function syncDishes() {
+  document.querySelectorAll('.dish').forEach(d => {
+    const q = Cart.quantityOf(d.dataset.id), p = Number(d.dataset.price), ok = d.dataset.ok === '1';
+    d.querySelector('.count').textContent = q;
+    d.querySelector('.minus').disabled = q === 0;
+    d.querySelector('.plus').disabled = !ok;
+    d.querySelector('.dish-line').innerHTML = !ok ? 'Not available today' : q ? `Subtotal: <strong>₹${(q * p).toFixed(2)}</strong>` : 'Not in cart';
+  });
+}
+function syncBar() {
+  const n = Cart.count();
+  $('barCount').textContent = n + (n === 1 ? ' item' : ' items');
+  $('barTotal').textContent = '₹' + Cart.total().toFixed(2);
+}
+function renderCart() {
+  const items = Cart.read();
+  if (!items.length) {
+    $('cartItems').innerHTML = '<p>Your cart is empty.</p>';
+    $('cartTotal').textContent = 'Total: ₹0.00'; $('checkoutButton').disabled = true; return;
+  }
+  $('checkoutButton').disabled = false;
+  $('cartItems').innerHTML = items.map(i => `
+    <article class="cart-row">
+      <div><h3>${esc(i.name)}</h3><p>₹${Number(i.price).toFixed(2)} each</p></div>
+      <div class="quantity-controls">
+        <button data-action="minus" data-id="${esc(i.mealId)}">−</button><span>${i.quantity}</span>
+        <button data-action="plus" data-id="${esc(i.mealId)}">+</button>
+        <button data-action="remove" data-id="${esc(i.mealId)}">Remove</button>
+      </div>
+      <strong>₹${(i.price * i.quantity).toFixed(2)}</strong>
+    </article>`).join('');
+  $('cartTotal').textContent = 'Total: ₹' + Cart.total().toFixed(2);
+}
+$('cartItems').addEventListener('click', e => {
+  const b = e.target.closest('button[data-action]'); if (!b) return;
+  if (b.dataset.action === 'plus') Cart.change(b.dataset.id, 1);
+  if (b.dataset.action === 'minus') Cart.change(b.dataset.id, -1);
+  if (b.dataset.action === 'remove') Cart.remove(b.dataset.id);
+});
+function refreshAll() { syncDishes(); syncBar(); renderCart(); }
+window.addEventListener('cart:changed', refreshAll);
+window.addEventListener('storage', refreshAll);
+refreshAll(); loadMenu();
+</script>
+<script src="/js/payment.js"></script>
+</body>
+</html>

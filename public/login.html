@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login | MIT Canteen</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14313a;--accent:#1f7a6b;--dark:#17594e;--soft:#e6f3f0;--muted:#5b6b70;--border:#d5dddf;--danger:#b3382c}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Manrope,"Segoe UI",system-ui,sans-serif;color:var(--ink);background:#f2f5f4}
+a{color:var(--accent);font-weight:700;text-decoration:none}
+a:hover{text-decoration:underline}
+
+.wrap{display:grid;grid-template-columns:1.1fr 1fr;min-height:100vh}
+
+/* ---------- Left: image panel ---------- */
+.hero{
+  position:relative;display:flex;flex-direction:column;justify-content:space-between;
+  padding:40px 48px;color:#fff;
+  /* Change the image file name here to use a different photo */
+  background:
+    linear-gradient(160deg,rgba(20,49,58,.78) 0%,rgba(31,122,107,.55) 100%),
+    url("VEGTHALI.jpeg") center/cover no-repeat;
+}
+.brand{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;color:#fff}
+.brand a{color:#fff}
+.hero h2{font-size:2.6rem;line-height:1.15;margin:0 0 14px;letter-spacing:-.02em;text-shadow:0 2px 14px rgba(0,0,0,.3)}
+.hero p{margin:0 0 24px;font-size:1.05rem;color:rgba(255,255,255,.9);max-width:440px}
+.perks{display:flex;gap:10px;flex-wrap:wrap}
+.perks span{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(4px);padding:8px 14px;border-radius:999px;font-weight:600;font-size:.9rem}
+.hero small{color:rgba(255,255,255,.75)}
+
+/* ---------- Right: form ---------- */
+.side{display:grid;place-items:center;padding:32px 24px}
+.box{width:100%;max-width:420px}
+.box h1{margin:0 0 4px;font-size:1.9rem;letter-spacing:-.02em}
+.sub{color:var(--muted);margin:0 0 20px}
+
+.role{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.role button{
+  display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 10px;
+  background:#fff;border:2px solid var(--border);border-radius:14px;font:inherit;cursor:pointer;color:var(--muted);transition:.15s
+}
+.role button .ic{font-size:1.6rem}
+.role button b{font-size:.95rem;color:var(--ink)}
+.role button small{font-size:.75rem}
+.role button:hover{border-color:var(--accent)}
+.role button.on{border-color:var(--accent);background:var(--soft)}
+.role button.on b{color:var(--dark)}
+
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:6px}
+.tabs button{flex:1;padding:12px;border:0;background:none;font:inherit;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tabs button.on{color:var(--accent);border-bottom-color:var(--accent)}
+
+label{display:block;font-weight:600;font-size:.88rem;margin:14px 0 5px}
+.field{position:relative}
+input{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:10px;font:inherit;background:#fff;transition:.15s}
+input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(31,122,107,.15)}
+.eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:0;cursor:pointer;font-size:1.1rem;padding:4px}
+.go{width:100%;margin-top:20px;padding:14px;background:var(--accent);color:#fff;border:0;border-radius:10px;font:inherit;font-weight:800;font-size:1rem;cursor:pointer;transition:.15s}
+.go:hover{background:var(--dark);transform:translateY(-1px)}
+.err{color:var(--danger);font-size:.9rem;min-height:1.3em;margin:12px 0 0;font-weight:600}
+.switch{text-align:center;margin:14px 0 0;color:var(--muted);font-size:.95rem}
+.back{text-align:center;margin:18px 0 0;font-size:.9rem}
+form{display:none}form.show{display:block}
+
+@media(max-width:860px){
+  .wrap{grid-template-columns:1fr}
+  .hero{padding:28px 24px;min-height:220px}
+  .hero h2{font-size:1.7rem}
+  .hero p,.perks,.hero small{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- LEFT: image + tagline -->
+  <aside class="hero">
+    <div class="brand"><a href="/index.html">🍽 MIT Canteen</a></div>
+    <div>
+      <h2>Fresh food.<br>Zero waiting.</h2>
+      <p>Order from your phone, pay with a QR and pick up your meal with a token number.</p>
+      <div class="perks"><span>⚡ Quick ordering</span><span>📱 UPI QR payment</span><span>🧾 Instant receipt</span></div>
+    </div>
+    <small>Breakfast · Lunch · Dinner</small>
+  </aside>
+
+  <!-- RIGHT: forms -->
+  <main class="side">
+    <div class="box">
+      <h1 id="title">Welcome back 👋</h1>
+      <p class="sub" id="subtitle">Log in to order your meal</p>
+
+      <!-- Student / Admin selection -->
+      <div class="role">
+        <button id="rStudent" class="on" type="button"><span class="ic">🎓</span><b>Student</b><small>Order food</small></button>
+        <button id="rAdmin" type="button"><span class="ic">🛠</span><b>Admin</b><small>Manage canteen</small></button>
+      </div>
+
+      <!-- Log in / Create account (students only) -->
+      <div class="tabs" id="tabs">
+        <button id="tLogin" class="on" type="button">Log in</button>
+        <button id="tSignup" type="button">Create account</button>
+      </div>
+
+      <form id="fLogin" class="show">
+        <label>Email</label><input id="lEmail" type="email" placeholder="you@college.edu" required>
+        <label>Password</label>
+        <div class="field"><input id="lPass" type="password" placeholder="Your password" required><button type="button" class="eye" data-t="lPass">👁</button></div>
+        <button class="go" id="loginBtn">Log in as Student</button>
+      </form>
+
+      <form id="fSignup">
+        <label>Full name</label><input id="sName" placeholder="Your full name" required>
+        <label>Email</label><input id="sEmail" type="email" placeholder="you@college.edu" required>
+        <label>Password</label>
+        <div class="field"><input id="sPass" type="password" minlength="6" placeholder="At least 6 characters" required><button type="button" class="eye" data-t="sPass">👁</button></div>
+        <button class="go">Create my account</button>
+      </form>
+
+      <!-- One-time admin setup: creates the single admin account -->
+      <form id="fAdmin">
+        <label>Admin name</label><input id="aName" required>
+        <label>Admin email</label><input id="aEmail" type="email" required>
+        <label>Password</label><input id="aPass" type="password" minlength="6" required>
+        <label>Setup key (from your .env file)</label><input id="aKey" type="password" required>
+        <button class="go">Create admin account</button>
+      </form>
+
+      <p class="err" id="err"></p>
+
+      <p class="switch" id="switchStudent">
+        <span id="switchText">New here?</span> <a href="#" id="switchLink">Create an account</a>
+      </p>
+      <p class="switch" id="setupLink" style="display:none">First time setting up? <a href="#" id="openSetup">Create the admin account</a></p>
+
+      <p class="back"><a href="index.html">← Back to home</a></p>
+    </div>
+  </main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let mode = 'student';
+let current = 'fLogin';
+
+function note(msg, good) { $('err').textContent = msg; $('err').style.color = good ? 'var(--accent)' : ''; }
+
+function show(which){
+  current = which;
+  ['fLogin','fSignup','fAdmin'].forEach(f => $(f).classList.toggle('show', f === which));
+  $('tLogin').classList.toggle('on', which === 'fLogin');
+  $('tSignup').classList.toggle('on', which === 'fSignup');
+  note('');
+  const isAdmin = mode === 'admin';
+  if (which === 'fSignup') { $('title').textContent = 'Create your account'; $('subtitle').textContent = 'Join in a few seconds, it is free'; }
+  else if (which === 'fAdmin') { $('title').textContent = 'Admin setup'; $('subtitle').textContent = 'One-time setup for the canteen owner'; }
+  else { $('title').textContent = isAdmin ? 'Admin login' : 'Welcome back 👋'; $('subtitle').textContent = isAdmin ? 'Manage menu, orders and live stats' : 'Log in to order your meal'; }
+  $('switchText').textContent = which === 'fSignup' ? 'Already have an account?' : 'New here?';
+  $('switchLink').textContent = which === 'fSignup' ? 'Log in' : 'Create an account';
+}
+
+function setRole(r){
+  mode = r;
+  const isAdmin = r === 'admin';
+  $('rStudent').classList.toggle('on', !isAdmin);
+  $('rAdmin').classList.toggle('on', isAdmin);
+  $('tabs').style.display = isAdmin ? 'none' : 'flex';
+  $('switchStudent').style.display = isAdmin ? 'none' : 'block';
+  $('setupLink').style.display = isAdmin ? 'block' : 'none';
+  $('loginBtn').textContent = isAdmin ? 'Log in as Admin' : 'Log in as Student';
+  show('fLogin');
+}
+
+$('rStudent').onclick = () => setRole('student');
+$('rAdmin').onclick = () => setRole('admin');
+$('tLogin').onclick = () => show('fLogin');
+$('tSignup').onclick = () => show('fSignup');
+$('switchLink').onclick = e => { e.preventDefault(); show(current === 'fSignup' ? 'fLogin' : 'fSignup'); };
+$('openSetup').onclick = e => { e.preventDefault(); show('fAdmin'); };
+if (location.hash === '#setup') { setRole('admin'); show('fAdmin'); }
+if (location.hash === '#signup') { show('fSignup'); }
+
+document.querySelectorAll('.eye').forEach(b => b.onclick = () => {
+  const i = $(b.dataset.t); i.type = i.type === 'password' ? 'text' : 'password';
+});
+
+async function call(url, body){
+  try {
+    const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    return { ok: r.ok, d: await r.json() };
+  } catch { return { ok:false, d:{ message:'Cannot reach server' } }; }
+}
+
+// LOG IN -> student goes to orders.html (choose mess), admin goes to admin.html
+$('fLogin').onsubmit = async e => {
+  e.preventDefault(); note('');
+  const { ok, d } = await call('/api/auth/login', { email:$('lEmail').value, password:$('lPass').value });
+  if (!ok) return note(d.message || 'Something went wrong');
+  if (d.role !== mode) return note(mode === 'admin' ? 'This account is not an admin. Switch to Student.' : 'This is the admin account. Switch to Admin to log in.');
+  localStorage.setItem('token', d.token);
+  localStorage.setItem('role', d.role);
+  localStorage.setItem('name', d.name || 'Admin');
+  location.href = d.role === 'admin' ? '/admin.html' : '/orders.html';
+};
+
+// CREATE ACCOUNT -> back to the login form (no auto login)
+$('fSignup').onsubmit = async e => {
+  e.preventDefault(); note('');
+  const email = $('sEmail').value;
+  const { ok, d } = await call('/api/auth/signup', { name:$('sName').value, email, password:$('sPass').value });
+  if (!ok) return note(d.message || 'Something went wrong');
+  $('fSignup').reset();
+  setRole('student');
+  $('lEmail').value = email; $('lPass').value = '';
+  note('✅ Account created! Please log in.', true);
+};
+
+// ADMIN SETUP -> back to the login form
+$('fAdmin').onsubmit = async e => {
+  e.preventDefault(); note('');
+  const email = $('aEmail').value;
+  const { ok, d } = await call('/api/auth/admin-setup', { name:$('aName').value, email, password:$('aPass').value, setupKey:$('aKey').value });
+  if (!ok) return note(d.message || 'Something went wrong');
+  $('fAdmin').reset();
+  setRole('admin');
+  $('lEmail').value = email; $('lPass').value = '';
+  note('✅ Admin created! Please log in.', true);
+};
+</script>
+</body>
+</html>

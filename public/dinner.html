@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dinner Menu | MIT Canteen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #14313a;
+            --page: #f2f5f4;
+            --surface: #ffffff;
+            --accent: #1f7a6b;
+            --accent-dark: #17594e;
+            --muted: #5b6b70;
+            --border: #d5dddf;
+            --danger: #b3382c;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { margin: 0; font-family: "Manrope", "Segoe UI", system-ui, Arial, sans-serif; color: var(--ink); background: var(--page); }
+        a { color: inherit; text-decoration: none; }
+        a:focus-visible, button:focus-visible { outline: 3px solid rgba(31,122,107,0.4); outline-offset: 3px; }
+        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+
+        .navbar { position: sticky; top: 0; z-index: 10; background: var(--surface); border-bottom: 1px solid var(--border); }
+        .navbar .container { display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 72px; }
+        .logo { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; color: var(--accent); }
+        .nav-links { display: flex; align-items: center; gap: 32px; margin: 0; padding: 0; list-style: none; font-size: 0.9375rem; font-weight: 600; }
+        .nav-links a:hover { color: var(--accent); }
+        .nav-links .nav-cta { padding: 10px 20px; color: #fff; background: var(--accent); border-radius: 8px; }
+        .nav-links .nav-cta:hover { background: var(--accent-dark); color: #fff; }
+
+        main { padding: 48px 0 110px; }
+        h1 { margin: 0 0 8px; font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+        .sub { margin: 0 0 24px; color: var(--muted); }
+
+        .tabs { display: flex; gap: 8px; margin-bottom: 32px; flex-wrap: wrap; }
+        .tabs a { padding: 8px 18px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); font-weight: 600; font-size: 0.9375rem; }
+        .tabs a:hover { border-color: var(--accent); color: var(--accent); }
+        .tabs a.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+        .menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .dish { overflow: hidden; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; transition: transform 0.15s, box-shadow 0.15s; }
+        .dish:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(20,49,58,0.1); }
+        .dish img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #dfe7e5; }
+        .dish-body { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 18px; }
+        .dish-name { margin: 0; font-size: 1.0625rem; font-weight: 700; }
+        .price { font-size: 1.125rem; font-weight: 800; color: var(--accent); white-space: nowrap; }
+
+        /* + / - controls on each dish */
+        .dish-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 18px 16px; border-top: 1px solid var(--border); }
+        .dish-line { font-size: 0.875rem; color: var(--muted); font-weight: 600; }
+        .dish-line strong { color: var(--ink); }
+        .qty { display: inline-flex; align-items: center; gap: 4px; }
+        .qty button { width: 34px; height: 34px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; font-size: 1.125rem; font-weight: 700; line-height: 1; cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+        .qty .plus { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .qty .plus:hover { background: var(--accent-dark); }
+        .qty .minus:hover:not(:disabled) { border-color: var(--danger); color: var(--danger); }
+        .qty button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .qty .count { min-width: 32px; text-align: center; font-weight: 800; }
+
+        @media (max-width: 900px) { .menu { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 480px) { .menu { grid-template-columns: 1fr; } }
+        @media (max-width: 700px) {
+            .container { padding: 0 20px; }
+            .navbar .container { height: auto; padding-top: 14px; padding-bottom: 14px; flex-wrap: wrap; }
+            .nav-links { gap: 20px; flex-wrap: wrap; }
+        }
+
+        /* Cart section */
+        .cart-section { margin-top: 48px; scroll-margin-top: 90px; }
+        .cart-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 14px 18px; margin-bottom: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+        .cart-row h3 { margin: 0 0 4px; font-size: 1.0625rem; }
+        .cart-row p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+        .quantity-controls { display: flex; align-items: center; gap: 8px; }
+        .quantity-controls button, #checkoutButton { padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); font: inherit; font-weight: 600; cursor: pointer; }
+        .quantity-controls button[data-action="remove"]:hover { border-color: var(--danger); color: var(--danger); }
+        #checkoutButton { background: var(--accent); border-color: var(--accent); color: #fff; padding: 12px 24px; }
+        #checkoutButton:hover:not(:disabled) { background: var(--accent-dark); }
+        #checkoutButton:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Sticky live total bar */
+        .cart-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--ink); color: #fff; }
+        .cart-bar .container { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 14px; padding-bottom: 14px; }
+        .cart-bar-info { font-weight: 600; }
+        .cart-bar-info strong { font-size: 1.125rem; font-weight: 800; }
+        .cart-bar a { padding: 10px 20px; background: var(--accent); border-radius: 8px; font-weight: 700; }
+        .cart-bar a:hover { background: var(--accent-dark); }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="container">
+            <a href="../index.html" class="logo">MIT Canteen</a>
+            <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="aboutus.html">About us</a></li>
+                <li><a href="login.html" class="nav-cta">Sign up / Log in</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1>Dinner</h1>
+            <p class="sub">Served 7:00 PM – 9:30 PM</p>
+
+            <nav class="tabs" aria-label="Menu sections">
+                <a href="breakfast.html">Breakfast</a>
+                <a href="lunch.html">Lunch</a>
+                <a href="dinner.html" class="active">Dinner</a>
+            </nav>
+
+            <section class="menu" id="menu">
+                <article class="dish" data-id="dal-tadka-rice" data-name="Dal Tadka Rice" data-price="80">
+                    <img src="dal_tadka.jpg" alt="Dal Tadka Rice">
+                    <div class="dish-body">
+                        <h3 class="dish-name">Dal Tadka Rice</h3>
+                        <span class="price">₹80</span>
+                    </div>
+                </article>
+                <article class="dish" data-id="paneer-butter-masala" data-name="Paneer Butter Masala" data-price="120">
+                    <img src="PANEERMASAL.jpeg" alt="Paneer Butter Masala">
+                    <div class="dish-body">
+                        <h3 class="dish-name">Paneer Butter Masala</h3>
+                        <span class="price">₹120</span>
+                    </div>
+                </article>
+                <article class="dish" data-id="pav-bhaji" data-name="Pav Bhaji" data-price="70">
+                    <img src="pav bhaji.jpeg" alt="Pav Bhaji">
+                    <div class="dish-body">
+                        <h3 class="dish-name">Pav Bhaji</h3>
+                        <span class="price">₹70</span>
+                    </div>
+                </article>
+                <article class="dish" data-id="veg-fried-rice" data-name="Veg Fried Rice" data-price="70">
+                    <img src="vegfriedrice.jpeg" alt="Veg Fried Rice">
+                    <div class="dish-body">
+                        <h3 class="dish-name">Veg Fried Rice</h3>
+                        <span class="price">₹70</span>
+                    </div>
+                </article>
+                <article class="dish" data-id="hakka-noodles" data-name="Hakka Noodles" data-price="70">
+                    <img src="hakka noodles.jpeg" alt="Hakka Noodles">
+                    <div class="dish-body">
+                        <h3 class="dish-name">Hakka Noodles</h3>
+                        <span class="price">₹70</span>
+                    </div>
+                </article>
+                <article class="dish" data-id="gulab-jamun" data-name="Gulab Jamun" data-price="30">
+                    <img src="Gulab Jamun.jpg" alt="Gulab Jamun">
+                    <div class="dish-body">
+                        <h3 class="dish-name">Gulab Jamun</h3>
+                        <span class="price">₹30</span>
+                    </div>
+                </article>
+                <article class="dish" data-id="cold-coffee" data-name="Cold Coffee" data-price="45">
+                    <img src="COLDCOFEE.jpeg" alt="Cold Coffee">
+                    <div class="dish-body">
+                        <h3 class="dish-name">Cold Coffee</h3>
+                        <span class="price">₹45</span>
+                    </div>
+                </article>
+            </section>
+
+            <!-- ===== Cart section ===== -->
+            <section class="cart-section" id="cart">
+                <h1>Your shopping cart</h1>
+                <div id="cartItems"></div>
+                <h2 id="cartTotal">Total: ₹0.00</h2>
+                <button id="checkoutButton">Proceed to checkout</button>
+                <p><a href="dinner.html">Continue shopping</a></p>
+            </section>
+        </div>
+    </main>
+
+    <!-- Live total bar -->
+    <div class="cart-bar">
+        <div class="container">
+            <div class="cart-bar-info"><span id="barCount">0 items</span> · <strong id="barTotal">₹0.00</strong></div>
+            <a href="#cart">View cart</a>
+        </div>
+    </div>
+
+    <script>
+        /* ---------- Cart store (saved in localStorage, shared across pages) ---------- */
+        const Cart = {
+            key: "canteenCart",
+            read() {
+                try { return JSON.parse(localStorage.getItem(this.key)) || []; }
+                catch (e) { return []; }
+            },
+            write(items) {
+                try { localStorage.setItem(this.key, JSON.stringify(items)); } catch (e) {}
+                window.dispatchEvent(new Event("cart:changed"));
+            },
+            quantityOf(id) {
+                const found = this.read().find(i => i.mealId === id);
+                return found ? found.quantity : 0;
+            },
+            add(meal) {
+                const items = this.read();
+                const found = items.find(i => i.mealId === meal.mealId);
+                if (found) found.quantity += 1;
+                else items.push({ mealId: meal.mealId, name: meal.name, price: meal.price, quantity: 1 });
+                this.write(items);
+            },
+            changeQuantity(id, delta) {
+                let items = this.read();
+                const found = items.find(i => i.mealId === id);
+                if (!found) return;
+                found.quantity += delta;
+                items = items.filter(i => i.quantity > 0);   // reaching 0 removes it from the cart
+                this.write(items);
+            },
+            remove(id) {
+                this.write(this.read().filter(i => i.mealId !== id));
+            },
+            count() {
+                return this.read().reduce((n, i) => n + i.quantity, 0);
+            },
+            total() {
+                return this.read().reduce((sum, i) => sum + i.price * i.quantity, 0);
+            }
+        };
+
+        /* ---------- Add + / - controls to every dish card ---------- */
+        document.querySelectorAll(".dish").forEach(dish => {
+            const footer = document.createElement("div");
+            footer.className = "dish-footer";
+            footer.innerHTML = `
+                <span class="dish-line"></span>
+                <div class="qty">
+                    <button type="button" class="minus" aria-label="Remove one ${dish.dataset.name}">−</button>
+                    <span class="count" aria-live="polite">0</span>
+                    <button type="button" class="plus" aria-label="Add one ${dish.dataset.name}">+</button>
+                </div>`;
+            dish.appendChild(footer);
+
+            footer.querySelector(".plus").addEventListener("click", () => {
+                Cart.add({
+                    mealId: dish.dataset.id,
+                    name: dish.dataset.name,
+                    price: Number(dish.dataset.price)
+                });
+            });
+            footer.querySelector(".minus").addEventListener("click", () => {
+                Cart.changeQuantity(dish.dataset.id, -1);
+            });
+        });
+
+        function syncDishes() {
+            document.querySelectorAll(".dish").forEach(dish => {
+                const qty = Cart.quantityOf(dish.dataset.id);
+                const price = Number(dish.dataset.price);
+                dish.querySelector(".count").textContent = qty;
+                dish.querySelector(".minus").disabled = qty === 0;
+                dish.querySelector(".dish-line").innerHTML =
+                    qty ? `Subtotal: <strong>₹${(qty * price).toFixed(2)}</strong>` : "Not in cart";
+            });
+        }
+
+        function syncBar() {
+            const n = Cart.count();
+            document.getElementById("barCount").textContent = n + (n === 1 ? " item" : " items");
+            document.getElementById("barTotal").textContent = "₹" + Cart.total().toFixed(2);
+        }
+
+        /* ---------- Cart section ---------- */
+        const container = document.getElementById("cartItems");
+
+        function renderCart() {
+            const items = Cart.read();
+
+            if (!items.length) {
+                container.innerHTML = "<p>Your cart is empty.</p>";
+                document.getElementById("cartTotal").textContent = "Total: ₹0.00";
+                document.getElementById("checkoutButton").disabled = true;
+                return;
+            }
+
+            document.getElementById("checkoutButton").disabled = false;
+
+            container.innerHTML = items.map(item => `
+                <article class="cart-row">
+                    <div>
+                        <h3>${escapeHTML(item.name)}</h3>
+                        <p>₹${Number(item.price).toFixed(2)} each</p>
+                    </div>
+                    <div class="quantity-controls">
+                        <button data-action="minus" data-id="${item.mealId}">−</button>
+                        <span>${item.quantity}</span>
+                        <button data-action="plus" data-id="${item.mealId}">+</button>
+                        <button data-action="remove" data-id="${item.mealId}">Remove</button>
+                    </div>
+                    <strong>₹${(item.price * item.quantity).toFixed(2)}</strong>
+                </article>
+            `).join("");
+
+            document.getElementById("cartTotal").textContent =
+                "Total: ₹" + Cart.total().toFixed(2);
+        }
+
+        function escapeHTML(value) {
+            return String(value ?? "").replace(/[&<>"']/g, char => ({
+                "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+            }[char]));
+        }
+
+        container.addEventListener("click", event => {
+            const button = event.target.closest("button[data-action]");
+            if (!button) return;
+
+            const id = button.dataset.id;
+            const action = button.dataset.action;
+
+            if (action === "plus") Cart.changeQuantity(id, 1);
+            if (action === "minus") Cart.changeQuantity(id, -1);
+            if (action === "remove") Cart.remove(id);
+        });
+
+        /* Everything refreshes automatically whenever the cart changes */
+        function refreshAll() {
+            syncDishes();
+            syncBar();
+            renderCart();
+        }
+        window.addEventListener("cart:changed", refreshAll);
+        window.addEventListener("storage", refreshAll);   // keeps other open tabs in sync
+        refreshAll();
+    </script>
+    <script src="../js/payment.js"></script>
+</body>
+</html>

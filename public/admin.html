@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin | MIT Canteen</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14313a;--page:#f2f5f4;--accent:#1f7a6b;--dark:#17594e;--muted:#5b6b70;--border:#d5dddf;--danger:#b3382c}
+*{box-sizing:border-box}
+body{margin:0;font-family:Manrope,"Segoe UI",system-ui,sans-serif;background:var(--page);color:var(--ink)}
+.c{max-width:1200px;margin:auto;padding:0 24px}
+nav{background:var(--ink);color:#fff}
+nav .c{display:flex;justify-content:space-between;align-items:center;height:64px}
+.out{padding:8px 16px;border:0;border-radius:8px;background:var(--accent);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+main{padding:28px 0 60px}
+h2{margin:32px 0 12px}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.stat{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px}
+.stat b{display:block;font-size:1.8rem;margin-top:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px}
+.bar{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:.9rem}
+.bar i{display:block;height:14px;background:var(--accent);border-radius:4px;min-width:3px}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);font-size:.92rem;vertical-align:middle}
+th{background:#eef3f2;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.wrap{overflow-x:auto}
+.badge{padding:4px 10px;border-radius:999px;font-weight:700;font-size:.8rem}
+.pending{background:#fff3cd;color:#8a6d00}.preparing{background:#dbeafe;color:#1e4fa3}.completed{background:#d8f3e6;color:#17594e}
+button.s{padding:6px 12px;border:1px solid var(--border);background:#fff;border-radius:7px;font:inherit;font-weight:600;cursor:pointer;margin-right:4px}
+button.s:hover{border-color:var(--accent);color:var(--accent)}
+button.del:hover{border-color:var(--danger);color:var(--danger)}
+select,input{padding:8px;border:1px solid var(--border);border-radius:7px;font:inherit}
+input.p{width:80px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.filters button{padding:7px 14px;border:1px solid var(--border);background:#fff;border-radius:999px;font:inherit;font-weight:600;cursor:pointer}
+.filters button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.add{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.muted{color:var(--muted)}
+.mrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.mrow select{min-width:200px;font-weight:700}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav><div class="c"><b>MIT Canteen · Admin</b><button class="out" id="logout">Log out</button></div></nav>
+<main><div class="c">
+
+  <p class="muted">Live view · refreshes every 5 seconds · <span id="upd"></span></p>
+  <div class="stats">
+    <div class="stat">Pending<b id="sPending">0</b></div>
+    <div class="stat">Preparing<b id="sPreparing">0</b></div>
+    <div class="stat">Completed<b id="sCompleted">0</b></div>
+    <div class="stat">Orders today<b id="sOrders">0</b></div>
+    <div class="stat">Revenue today<b id="sRev">₹0</b></div>
+  </div>
+  <p class="muted" style="margin:6px 0 0;font-size:.85rem">Totals above are for all messes combined.</p>
+
+  <div class="two" style="margin-top:16px">
+    <div class="card"><b>Orders per hour (rush time)</b><div id="hours" style="margin-top:8px"></div></div>
+    <div class="card"><b>Top dishes today</b><div id="top" style="margin-top:8px"></div></div>
+  </div>
+
+  <h2>Orders</h2>
+  <div class="filters">
+    <span id="filters">
+      <button data-f="" class="on">All</button>
+      <button data-f="pending">Pending</button>
+      <button data-f="preparing">Preparing</button>
+      <button data-f="completed">Completed</button>
+    </span>
+    <select id="oMess"><option value="">All messes</option></select>
+  </div>
+  <div class="wrap"><table>
+    <thead><tr><th>Token</th><th>Mess</th><th>Student</th><th>Items</th><th>Total</th><th>UPI Ref</th><th>Time</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody id="orders"></tbody>
+  </table></div>
+
+  <h2>Menu editor</h2>
+  <div class="mrow">
+    <b>Mess:</b><select id="mSel"></select>
+    <span class="muted">Changes apply only to the selected mess.</span>
+  </div>
+  <div class="wrap"><table>
+    <thead><tr><th>Dish</th><th>Meal</th><th>Price ₹</th><th>Available</th><th></th></tr></thead>
+    <tbody id="meals"></tbody>
+  </table></div>
+  <div class="card" style="margin-top:14px"><b>Add a new dish to this mess</b>
+    <div class="add">
+      <input id="nName" placeholder="Dish name">
+      <input id="nPrice" class="p" type="number" min="1" placeholder="Price">
+      <select id="nCat"><option>breakfast</option><option>lunch</option><option>dinner</option></select>
+      <input id="nImg" placeholder="image file e.g. poha.jpeg">
+      <button class="s" id="nAdd">Add dish</button>
+    </div>
+  </div>
+
+  <h2>Add a new mess</h2>
+  <div class="card">
+    <div class="add" style="margin-top:0">
+      <input id="xName" placeholder="Mess name e.g. Tulsi Mess">
+      <input id="xImg" placeholder="cover image file e.g. VEGTHALI.jpeg">
+      <button class="s" id="xAdd">Add mess</button>
+    </div>
+    <p class="muted" style="margin:10px 0 0;font-size:.85rem">A new mess starts with no dishes. Add them in the Menu editor above.</p>
+  </div>
+
+  <h2>Timetable</h2>
+  <div class="card muted">Breakfast 7:30–10:30 AM &nbsp;·&nbsp; Lunch 12:00–3:00 PM &nbsp;·&nbsp; Dinner 7:00–9:30 PM</div>
+</div></main>
+
+<script>
+const T = localStorage.getItem('token');
+if (!T || localStorage.getItem('role') !== 'admin') location.href = '/login.html';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function api(url, method = 'GET', body) {
+  const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + T }, body: body ? JSON.stringify(body) : undefined });
+  if (r.status === 401 || r.status === 403) { localStorage.clear(); location.href = '/login.html'; throw new Error('auth'); }
+  return r.json();
+}
+$('logout').onclick = () => { localStorage.clear(); location.href = '/index.html'; };
+
+/* ---- live stats ---- */
+async function loadStats() {
+  const s = await api('/api/orders/admin/stats');
+  const g = k => (s.byStatus.find(x => x._id === k) || {}).n || 0;
+  $('sPending').textContent = g('pending'); $('sPreparing').textContent = g('preparing'); $('sCompleted').textContent = g('completed');
+  $('sOrders').textContent = s.orders; $('sRev').textContent = '₹' + s.revenue;
+  const max = Math.max(1, ...s.perHour.map(h => h.n));
+  $('hours').innerHTML = s.perHour.length ? s.perHour.map(h => `<div class="bar"><span style="width:60px">${h._id}:00</span><i style="width:${h.n / max * 70}%"></i>${h.n}</div>`).join('') : '<span class="muted">No orders yet today</span>';
+  const tm = Math.max(1, ...s.top.map(t => t.qty));
+  $('top').innerHTML = s.top.length ? s.top.map(t => `<div class="bar"><span style="width:130px">${esc(t._id)}</span><i style="width:${t.qty / tm * 50}%"></i>${t.qty}</div>`).join('') : '<span class="muted">No data yet</span>';
+}
+
+/* ---- orders (status filter on server, mess filter in the browser) ---- */
+let filter = '';
+async function loadOrders() {
+  let list = await api('/api/orders/admin/all' + (filter ? '?status=' + filter : ''));
+  const messFilter = $('oMess').value;
+  if (messFilter) list = list.filter(o => o.messName === messFilter);
+  $('orders').innerHTML = list.length ? list.map(o => `<tr>
+    <td><b>#${o.tokenNo}</b></td>
+    <td>${esc(o.messName || '—')}</td>
+    <td>${esc(o.user ? o.user.name : '—')}<br><span class="muted">${esc(o.user ? o.user.email : '')}</span></td>
+    <td>${o.items.map(i => esc(i.name) + ' × ' + i.quantity).join('<br>')}</td>
+    <td>₹${o.total}</td><td>${esc(o.txnRef)}</td>
+    <td>${new Date(o.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</td>
+    <td><span class="badge ${o.status}">${o.status}</span></td>
+    <td>${o.status === 'pending' ? `<button class="s" data-id="${o._id}" data-st="preparing">Start</button>` : ''}
+        ${o.status !== 'completed' ? `<button class="s" data-id="${o._id}" data-st="completed">Done</button>` : ''}</td>
+  </tr>`).join('') : '<tr><td colspan="9" class="muted">No orders</td></tr>';
+}
+$('orders').onclick = async e => {
+  const b = e.target.closest('button[data-id]'); if (!b) return;
+  await api('/api/orders/' + b.dataset.id + '/status', 'PATCH', { status: b.dataset.st });
+  refresh();
+};
+$('filters').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  filter = b.dataset.f;
+  [...$('filters').children].forEach(x => x.classList.toggle('on', x === b));
+  loadOrders();
+};
+$('oMess').onchange = loadOrders;
+
+/* ---- messes + menu editor (not auto-refreshed so your typing isn't wiped) ---- */
+async function loadMesses(keep) {
+  const ms = await api('/api/mess');
+  const prevMenu = keep || $('mSel').value;
+  $('mSel').innerHTML = ms.map(m => `<option value="${m._id}">${esc(m.name)}</option>`).join('');
+  if (prevMenu && ms.some(m => m._id === prevMenu)) $('mSel').value = prevMenu;
+  const prevOrder = $('oMess').value;
+  $('oMess').innerHTML = '<option value="">All messes</option>' + ms.map(m => `<option value="${esc(m.name)}">${esc(m.name)}</option>`).join('');
+  $('oMess').value = prevOrder;
+  loadMeals();
+}
+async function loadMeals() {
+  if (!$('mSel').value) { $('meals').innerHTML = '<tr><td colspan="5" class="muted">No messes yet. Run node seed.js or add one below.</td></tr>'; return; }
+  const meals = await api('/api/meals?mess=' + $('mSel').value);
+  $('meals').innerHTML = meals.length ? meals.map(m => `<tr data-id="${m._id}">
+    <td>${esc(m.name)}</td><td>${m.category}</td>
+    <td><input class="p" type="number" min="1" value="${m.price}"></td>
+    <td><input type="checkbox" ${m.available ? 'checked' : ''}></td>
+    <td><button class="s save">Save</button><button class="s del">Delete</button></td></tr>`).join('')
+    : '<tr><td colspan="5" class="muted">No dishes in this mess yet.</td></tr>';
+}
+$('mSel').onchange = loadMeals;
+
+$('meals').onclick = async e => {
+  const tr = e.target.closest('tr[data-id]'); if (!tr) return;
+  if (e.target.classList.contains('save')) {
+    await api('/api/meals/' + tr.dataset.id, 'PUT', { price: Number(tr.querySelector('input[type=number]').value), available: tr.querySelector('input[type=checkbox]').checked });
+    e.target.textContent = 'Saved ✓'; setTimeout(() => e.target.textContent = 'Save', 1200);
+  }
+  if (e.target.classList.contains('del') && confirm('Delete this dish?')) { await api('/api/meals/' + tr.dataset.id, 'DELETE'); loadMeals(); }
+};
+
+$('nAdd').onclick = async () => {
+  const name = $('nName').value.trim(), price = Number($('nPrice').value);
+  if (!$('mSel').value) return alert('Select a mess first');
+  if (!name || !(price > 0)) return alert('Enter dish name and price');
+  const res = await api('/api/meals', 'POST', { mess: $('mSel').value, slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'), name, price, category: $('nCat').value, image: $('nImg').value.trim() });
+  if (res.message) return alert(res.message);
+  $('nName').value = $('nPrice').value = $('nImg').value = ''; loadMeals();
+};
+
+$('xAdd').onclick = async () => {
+  const name = $('xName').value.trim();
+  if (!name) return alert('Enter the mess name');
+  const res = await api('/api/mess', 'POST', { name, image: $('xImg').value.trim() });
+  if (!res._id) return alert('Could not add mess (name already exists?)');
+  $('xName').value = $('xImg').value = '';
+  loadMesses(res._id);
+};
+
+function refresh() { loadStats(); loadOrders(); $('upd').textContent = 'updated ' + new Date().toLocaleTimeString('en-IN'); }
+refresh(); loadMesses(); setInterval(refresh, 5000);
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order Bill | Smart Canteen</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/api.js" defer></script>
+  <script src="/js/bill.js" defer></script>
+</head>
+<body>
+  <main class="container narrow">
+    <section id="bill" class="card">
+      <h1>Smart Campus Canteen</h1>
+      <p id="billMessage" role="status">Loading bill…</p>
+      <div id="billContent"></div>
+    </section>
+
+    <div class="no-print">
+      <button id="printBill" type="button">Print / Save as PDF</button>
+      <a href="/menu.html">Back to menu</a>
+    </div>
+  </main>
+</body>
+</html>

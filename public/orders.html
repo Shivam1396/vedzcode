@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Choose your mess | MIT Canteen</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14313a;--page:#f2f5f4;--accent:#1f7a6b;--dark:#17594e;--muted:#5b6b70;--border:#d5dddf}
+*{box-sizing:border-box}
+body{margin:0;font-family:Manrope,"Segoe UI",system-ui,sans-serif;background:var(--page);color:var(--ink)}
+a{color:inherit;text-decoration:none}
+.c{max-width:1100px;margin:auto;padding:0 24px}
+nav{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
+nav .c{display:flex;justify-content:space-between;align-items:center;height:64px}
+.logo{font-weight:800;color:var(--accent);font-size:1.2rem}
+.out{padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:#fff;font:inherit;font-weight:600;cursor:pointer}
+main{padding:32px 0 60px}
+h1{margin:0 0 4px}.sub{color:var(--muted);margin:0 0 24px}
+h2{margin:40px 0 14px;scroll-margin-top:80px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px}
+.mess{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:.15s;text-align:left;padding:0;font:inherit;color:inherit}
+.mess:hover{transform:translateY(-4px);box-shadow:0 12px 26px rgba(20,49,58,.14);border-color:var(--accent)}
+.mess img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#dfe7e5}
+.mess div{padding:14px 16px}.mess b{display:block;font-size:1.05rem}
+.mess span{color:var(--accent);font-weight:700;font-size:.9rem}
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px}
+.order{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.tok{font-size:1.3rem;font-weight:800;color:var(--accent)}
+.badge{padding:5px 12px;border-radius:999px;font-weight:700;font-size:.85rem}
+.pending{background:#fff3cd;color:#8a6d00}.preparing{background:#dbeafe;color:#1e4fa3}.completed{background:#d8f3e6;color:#17594e}
+.small{color:var(--muted);font-size:.9rem}
+</style>
+</head>
+<body>
+<nav><div class="c"><a href="/index.html" class="logo">MIT Canteen</a><button class="out" id="logout">Log out</button></div></nav>
+<main><div class="c">
+  <h1 id="hello">Hello</h1>
+  <p class="sub">Choose your mess to see its menu</p>
+  <div class="grid" id="messes"><p class="small">Loading messes…</p></div>
+
+  <h2 id="orders">My orders <span class="small">(updates automatically)</span></h2>
+  <div id="list"><p class="small">Loading…</p></div>
+</div></main>
+
+<script>
+const T = localStorage.getItem('token');
+if (!T || localStorage.getItem('role') !== 'student') location.replace('/login.html');
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+$('hello').textContent = 'Hello, ' + (localStorage.getItem('name') || 'student') + ' 👋';
+$('logout').onclick = () => { localStorage.clear(); location.href = '/index.html'; };
+
+async function loadMesses() {
+  const r = await fetch('/api/mess'); const list = await r.json();
+  $('messes').innerHTML = list.map(m => `
+    <button class="mess" data-id="${m._id}" data-name="${esc(m.name)}">
+      <img src="/${encodeURI(m.image || '')}" alt="" onerror="this.style.visibility='hidden'">
+      <div><b>${esc(m.name)}</b><span>View menu →</span></div>
+    </button>`).join('') || '<p class="small">No messes yet. Run node seed.js</p>';
+}
+$('messes').onclick = e => {
+  const b = e.target.closest('.mess'); if (!b) return;
+  const prev = JSON.parse(localStorage.getItem('selectedMess') || 'null');
+  if (prev && prev.id !== b.dataset.id) localStorage.removeItem('canteenCart'); // cart belongs to one mess
+  localStorage.setItem('selectedMess', JSON.stringify({ id: b.dataset.id, name: b.dataset.name }));
+  location.href = '/menu.html';
+};
+
+async function loadOrders() {
+  const r = await fetch('/api/orders/mine', { headers: { Authorization: 'Bearer ' + T } });
+  if (r.status === 401) { localStorage.clear(); location.href = '/login.html'; return; }
+  const orders = await r.json();
+  $('list').innerHTML = orders.length ? orders.map(o => `
+    <div class="card order">
+      <div><div class="tok">Token #${o.tokenNo}</div><div class="small">${esc(o.messName || '')} · ${new Date(o.createdAt).toLocaleString('en-IN')}</div></div>
+      <div>${o.items.map(i => esc(i.name) + ' × ' + i.quantity).join(', ')}</div>
+      <div><b>₹${o.total.toFixed(2)}</b></div>
+      <span class="badge ${o.status}">${o.status}</span>
+      <a href="/bill.html?id=${o._id}" style="color:var(--accent);font-weight:700">Receipt</a>
+    </div>`).join('') : '<p class="small">No orders yet.</p>';
+}
+loadMesses(); loadOrders(); setInterval(loadOrders, 5000);
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout | Smart Canteen</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/api.js" defer></script>
+  <script src="/js/cart.js" defer></script>
+  <script src="/js/checkout.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">Smart Canteen</a>
+    <nav><a href="/menu.html">Menu</a><a href="/cart.html">Cart</a></nav>
+  </header>
+
+  <main class="container narrow">
+    <h1>Checkout</h1>
+    <section class="card">
+      <h2>Order summary</h2>
+      <div id="checkoutSummary"></div>
+      <p>Total: <strong id="checkoutTotal">₹0.00</strong></p>
+    </section>
+
+    <form id="checkoutForm" class="card">
+      <label for="paymentMethod">Payment method</label>
+      <select id="paymentMethod" name="paymentMethod" required>
+        <option value="counter">Pay at canteen counter</option>
+        <option value="online">Online payment (requires Stripe setup)</option>
+      </select>
+      <button type="submit">Place order</button>
+      <p id="checkoutMessage" role="status"></p>
+    </form>
+  </main>
+</body>
+</html>
