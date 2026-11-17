@@ -202,7 +202,9 @@ $('fLogin').onsubmit = async e => {
   localStorage.setItem('token', d.token);
   localStorage.setItem('role', d.role);
   localStorage.setItem('name', d.name || 'Admin');
-  location.href = d.role === 'admin' ? '/admin.html' : '/orders.html';
+  const back = sessionStorage.getItem('returnTo'); sessionStorage.removeItem('returnTo');
+  const safe = back && back.startsWith('/') && !back.startsWith('//') ? back : '/orders.html';
+  location.href = d.role === 'admin' ? '/admin.html' : safe;
 };
 
 // CREATE ACCOUNT -> back to the login form (no auto login)
