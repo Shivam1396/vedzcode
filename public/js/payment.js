@@ -4,7 +4,13 @@
   if (!btn) return;
   btn.addEventListener('click', () => {
     const token = localStorage.getItem('token');
-    if (!token) { alert('Please log in first'); location.href = '/login.html'; return; }
+    if (!token) {
+      if (confirm('Please log in to place your order. Go to the login page?')) {
+        sessionStorage.setItem('returnTo', location.pathname + location.search);
+        location.href = '/login.html';
+      }
+      return;
+    }
     const items = JSON.parse(localStorage.getItem('canteenCart') || '[]');
     if (!items.length) return;
     const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
